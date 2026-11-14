@@ -1,7 +1,5 @@
 "use client"
-
 import Image from "next/image";
-
 
 const Navbar = () => {
     return (
@@ -18,10 +16,10 @@ const Navbar = () => {
                     />
                 </div>
                 <ul className="flex gap-6">
-                <li className="cursor-pointer text-[#032b41] text-xl">Login</li>
-                <li className="hidden min-[578px]:inline-block cursor-not-allowed text-[#032b41] text-xl">About</li>
-                <li className="hidden min-[578px]:inline-block cursor-not-allowed text-[#032b41] text-xl">Contact</li>
-                <li className="hidden min-[578px]:inline-block cursor-not-allowed text-[#032b41] text-xl">Help</li>
+                <li className="cursor-pointer text-[#032b41] text-xl pl-6">Login</li>
+                <li className="hidden min-[678px]:inline-block cursor-not-allowed text-[#032b41] text-xl">About</li>
+                <li className="hidden min-[678px]:inline-block cursor-not-allowed text-[#032b41] text-xl">Contact</li>
+                <li className="hidden min-[678px]:inline-block cursor-not-allowed text-[#032b41] text-xl">Help</li>
                 </ul>
             </div>
         </nav>
