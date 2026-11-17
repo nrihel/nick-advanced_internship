@@ -12,7 +12,7 @@ export default function Searchbar() {
         <>
         <div className="bg-white border-b border-[#e1e7ea] h-20 z-1 justify-end">
             <div className="relative flex items-center justify-between px-8 max-w-267.5 mx-auto h-full">
-                <div className="xs:invisible md:invisible sm:visible w-40 h-10">
+                <div className="hidden min-[480px]:block w-full max-w-40 shrink-0 md:invisible">
                     <Image
                         src="/logo.png"
                         alt="logo"
@@ -22,7 +22,7 @@ export default function Searchbar() {
                     />
                 </div>
                 <div className="flex items-center gap-6 w-full max-w-85">
-                    <div className="flex items-center w-full">
+                    <div className="flex items-center justify-end gap-4 w-full ml-auto">
                         <div className="relative flex items-center">
                             <input className="h-10 w-full pl-4 pr-12 bg-[#f1f6f4] text-[#042330] rounded-lg outline-none border-2 border-[#e1e7ea]" 
                                 type="text" 

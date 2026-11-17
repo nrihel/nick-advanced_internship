@@ -1,8 +1,8 @@
 import Searchbar from "@/shared/components/Searchbar";
 import Sidebar from "@/shared/components/sidebar";
-import Selected from "../selected book/Selected";
-import Recommended from "../recommended book/recommended";
-import Suggested from "../suggested/Suggested";
+import Selected from "../../shared/components/Selected";
+import Recommended from "../../shared/components/recommended";
+import Suggested from "../../shared/components/Suggested";
 
 const ForYou = () => {
     return (

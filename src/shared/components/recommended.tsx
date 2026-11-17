@@ -32,7 +32,7 @@ export default function Recommended() {
         async function getBooks() {
             try{
                 const { data } = await axios.get(
-                    "https://us-central1-summaristt.cloudfunctions.net/getBooks?status=suggested"
+                    "https://us-central1-summaristt.cloudfunctions.net/getBooks?status=recommended"
                 );
                 console.log(data);
                 setRecommendedBooks(data);
@@ -49,11 +49,11 @@ export default function Recommended() {
     return (
     <>
         <div>
-            <div className="text-[22px] font-bold text-[#032b41] my-4 px-6">
-                Suggested Books
+            <div className="text-[22px] font-bold text-[#032b41] mb-4 px-6">
+                Recommended for You
             </div>
-            <div className="font-light text-[#394547] mb-4 px-8">
-                Browse these books
+            <div className="font-light text-[#394547] mb-4 px-6">
+                We think you'll love these
             </div>
 
             <div className="flex overflow-x-auto snap-x snap-mandatory mb-8 gap-4">
@@ -76,6 +76,11 @@ export default function Recommended() {
                     href={`/book/${book.id}`}
                     className="relative snap-center max-w-50 w-full pt-8 px-3 pb-3 rounded-sm hover:bg-[#f1f6f4] transition-colors"
                 >
+                    {book.subscriptionRequired && (
+                    <div className="bg-[#032b41] text-white text-[10px] font-medium px-2 h-4.5 rounded-full flex items-center absolute top-2 right-2">
+                        Premium
+                    </div>
+                    )}
                     <figure className="w-43 h-43">
                         <img 
                             src={book.imageLink}
