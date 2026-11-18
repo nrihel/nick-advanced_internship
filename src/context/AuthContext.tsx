@@ -17,8 +17,9 @@ import {
   signOut,
   sendPasswordResetEmail,
 } from "firebase/auth";
-import { auth, googleProvider } from "@/app/lib/firebase/config";
+import { auth, googleProvider, db } from "@/app/lib/firebase/config";
 import LoginModal from "@/app/UI/LoginModal";
+import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 
 interface AuthContextType {
   user: User | null;
@@ -35,6 +36,8 @@ interface AuthContextType {
   loginAsGuest: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   logout: () => Promise<void>;
+  savedBookIds: string[];
+  toggleSaveBook: (bookId: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,14 +51,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const closeModal = () => setIsLoginOpen(false);
   const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
   const closeSidebar = () => setIsSidebarOpen(false);
+  const [savedBookIds, setSavedBookIds] = useState<string[]>([]);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        const userRef = doc(db, "users", currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          setSavedBookIds(userSnap.data().savedBooks || []);
+        } else {
+          await setDoc(userRef, {savedBooks: []});
+          setSavedBookIds([]);
+        }
+      } else {
+        setSavedBookIds([]);
+      }
       setLoading(false);
     });
     return () => unsubscribe();
   }, []);
+
+  const toggleSaveBook = async (bookId: string) => {
+    if (!user) {
+      openModal();
+      return;
+    }
+    const userRef = doc(db, "users", user.uid);
+    const isAlreadySaved = savedBookIds.includes(bookId);
+
+    if (isAlreadySaved) {
+      setSavedBookIds((prev) => prev.filter((id) => id !== bookId));
+      await setDoc(userRef, { savedBooks: arrayRemove(bookId) }, {merge: true} );
+    } else {
+      setSavedBookIds((prev) => [...prev, bookId]);
+      await setDoc(userRef, { savedBooks: arrayUnion(bookId) }, {merge: true});
+    }
+  };
 
   const loginWithEmail = async (email: string, password: string) => {
     await signInWithEmailAndPassword(auth, email, password);
@@ -97,7 +130,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         isSidebarOpen,
         toggleSidebar,
-        closeSidebar
+        closeSidebar,
+        savedBookIds,
+        toggleSaveBook,
       }}
     >
       {children}

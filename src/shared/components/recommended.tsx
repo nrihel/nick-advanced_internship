@@ -34,7 +34,6 @@ export default function Recommended() {
                 const { data } = await axios.get(
                     "https://us-central1-summaristt.cloudfunctions.net/getBooks?status=recommended"
                 );
-                console.log(data);
                 setRecommendedBooks(data);
             } catch (error) {
                 console.error("failed to fetch books", error)

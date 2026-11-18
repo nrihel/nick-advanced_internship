@@ -5,7 +5,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, } from "react";
 import { AiOutlineRead } from "react-icons/ai";
-import { FaRegBookmark, FaRegStar } from "react-icons/fa";
+import { FaBookmark, FaRegBookmark, FaRegStar } from "react-icons/fa";
 import { FiClock, FiMic } from "react-icons/fi";
 import { HiOutlineLightBulb } from "react-icons/hi";
 
@@ -30,10 +30,10 @@ interface Book {
 
 export default function BookDetailsPage({ id }: {id: string}) {
     const router = useRouter();
-    const { user, openModal } = useAuth();
+    const { user, openModal, savedBookIds, toggleSaveBook } = useAuth();
     const [book, setBook] = useState<Book | null>(null);
     const [loading, setLoading] = useState(true);
-    const [isSaved, setIsSaved] = useState(false);
+    const isSaved = savedBookIds.includes(id);
 
     useEffect(() => {
         if (!id) return;
@@ -43,7 +43,6 @@ export default function BookDetailsPage({ id }: {id: string}) {
                 const { data } = await axios.get<Book>(
                     `https://us-central1-summaristt.cloudfunctions.net/getBook?id=${id}`
                 );
-                console.log(data)
                 setBook(data);
             } catch (error) {
                 console.error("failed to get book details:", error);
@@ -64,17 +63,24 @@ export default function BookDetailsPage({ id }: {id: string}) {
     };
 
     const handleToggleLibrary = () => {
-        if (!user) {
-            openModal();
-            return;
-        }
-        setIsSaved((prev) => !prev);
+        toggleSaveBook(id);
     }
 
     return (
         <div className="max-w-267.5 w-full mx-auto pb-6 px-6">
             <div className="py-10 w-full">
-            {book && (
+            {loading ? (
+            <div className="flex flex-col lg:flex-row gap-8 animate-pulse">
+                <div className="w-75 h-75 min-w-75 bg-gray-200 rounded mx-auto lg:order-2" />
+                <div className="w-full space-y-4 lg:order-1">
+                    <div className="h-9 w-3/4 bg-gray-200 rounded" />
+                    <div className="h-5 w-1/3 bg-gray-200 rounded" />
+                    <div className="h-6 w-2/3 bg-gray-200 rounded" />
+                    <div className="h-24 w-full bg-gray-200 rounded" />
+                </div>
+            </div>
+            ) : (
+            book && (
                 <div className="flex flex-col lg:flex-row gap-8">
                 <div className="flex justify-center order-1 lg:order-2">
                     <figure className="w-75 h-75 min-w-75">
@@ -150,13 +156,25 @@ export default function BookDetailsPage({ id }: {id: string}) {
                     </div>
 
                     <button
+                    type="button"
                     onClick={handleToggleLibrary}
                     className="flex items-center gap-2 text-[#0365f2] font-semibold cursor-pointer mb-10 text-xl transition-colors duration-200 hover:text-[#044298]"
                     >
+                    {isSaved ? (
+                        <>
+                        <div className="flex w-5 h-5 shrink-0">
+                            <FaBookmark className="w-full h-full" />
+                        </div>
+                        <div>Saved in My Library</div>
+                        </>
+                    ) : (
+                        <>
                     <div className="flex w-5 h-5 shrink-0">
                         <FaRegBookmark className="w-full h-full" />
                     </div>
                     <div>Add title to My Library</div>
+                    </>
+                        )}
                     </button>
 
                     <div className="text-lg text-[#032b41] mb-4 font-semibold">
@@ -184,7 +202,7 @@ export default function BookDetailsPage({ id }: {id: string}) {
                     </div>
                 </div>
                 </div>
-            )}
+            ))}
             </div>
         </div>
     )
