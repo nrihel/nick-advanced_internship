@@ -38,6 +38,8 @@ interface AuthContextType {
   logout: () => Promise<void>;
   savedBookIds: string[];
   toggleSaveBook: (bookId: string) => Promise<void>;
+  fontSize: string;
+  setFontSize: (size: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -52,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
   const closeSidebar = () => setIsSidebarOpen(false);
   const [savedBookIds, setSavedBookIds] = useState<string[]>([]);
+  const [fontSize, setFontSize] = useState("text-base")
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -133,6 +136,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         closeSidebar,
         savedBookIds,
         toggleSaveBook,
+        fontSize,
+        setFontSize,
       }}
     >
       {children}

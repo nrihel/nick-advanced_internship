@@ -6,6 +6,7 @@ import { Suspense, useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "next/navigation";
 import AudioPlayer from "@/app/UI/AudioPlayer";
+import { useAuth } from "@/context/AuthContext";
 
 interface Book {
   id: string;
@@ -31,7 +32,7 @@ function Player() {
     const { id } = useParams<{ id: string }>();
     const [book, setBook] = useState<Book | null>(null);
     const [loading, setLoading] = useState(true);
-
+    const { fontSize } = useAuth();
     useEffect(() => {
         if (!id) return;
 
@@ -69,12 +70,12 @@ function Player() {
             ) : (
             book && (
             <>
-            <div className="relative w-full overflow-y-auto h-[(100vh-160px)]">
+            <div className="relative w-full overflow-y-auto h-[(100vh-140px)]">
                 <div className="whitespace-pre-line p-6 max-w-200 mx-auto">
                     <div className="text-[#032b41] text-[24px] border-b border-[#e1e7ea] mb-8 pb-4 leading-normal">
                         {book.title}
                     </div>
-                    <div className="whitespace-pre-line leading-[1.4] text-[#032b41]">
+                    <div className={`whitespace-pre-line leading-[1.4] text-[#032b41] ${fontSize}`}>
                         {book.summary}
                     </div>
                 </div>
