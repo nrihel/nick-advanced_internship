@@ -28,6 +28,18 @@ interface Book {
   authorDescription: string;
 }
 
+function BookCardSkeleton() {
+  return (
+    <div className="pt-8 px-3 pb-3">
+      <div className="w-43 h-43 mx-auto bg-gray-200 animate-pulse rounded-sm mb-2" />
+      <div className="w-3/4 h-5 bg-gray-200 animate-pulse rounded-sm mb-2" />
+      <div className="w-1/2 h-4 bg-gray-200 animate-pulse rounded-sm mb-2" />
+      <div className="w-full h-8 bg-gray-200 animate-pulse rounded-sm mb-2" />
+      <div className="w-1/2 h-4 bg-gray-200 animate-pulse rounded-sm" />
+    </div>
+  );
+}
+
 export default function MyLibrary() {
     const { user, loading: authLoading, openModal, savedBookIds } = useAuth();
     const [books, setBooks] = useState<Book[]>([]);
@@ -65,7 +77,22 @@ export default function MyLibrary() {
         <Searchbar />
         <div className="max-w-267.5 w-full mx-auto px-6">
             <div className="py-10">
-            {!authLoading && !user ? (
+            {authLoading ? (
+                <div>
+                     <div className="w-36 h-7 bg-gray-200 animate-pulse rounded-sm mb-2" />
+                    <div className="w-16 h-5 bg-gray-200 animate-pulse rounded-sm mb-6" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-14">
+                        {Array.from({ length: 4 }).map((_, index) => (
+                            <BookCardSkeleton key={index} />
+                        ))}
+                    </div>
+
+                    <div className="w-28 h-7 bg-gray-200 animate-pulse rounded-sm mb-2" />
+                    <div className="w-16 h-5 bg-gray-200 animate-pulse rounded-sm mb-6" />
+                    <div className="w-72 h-28 mx-auto bg-gray-200 animate-pulse rounded-lg" />
+                </div>
+                ) : !user ? (
+
                 <div className="flex flex-col items-center justify-center max-w-115 mx-auto text-center py-10">
                 <Image
                     src="/login.png"
@@ -95,21 +122,19 @@ export default function MyLibrary() {
 
                 {loading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-14">
-                    {Array.from({ length: 4 }).map((_, index) => (
-                        <div
-                        key={index}
-                        className="w-full h-75 bg-gray-200 animate-pulse rounded-sm"
-                        />
-                    ))}
+                    {Array.from({ length: savedBookIds.length || 4 }).map((_, index) => (
+                        <BookCardSkeleton key={index} />
+                    )
+                    )}
                     </div>
                 ) : books.length === 0 ? (
                     <div className="flex flex-col items-center gap-2 p-8 rounded-lg text-center mx-auto mb-14 bg-[#f1f6f4] max-w-fit">
-                    <div className="font-semibold text-[#042330]">
-                        Save your favorite books!
-                    </div>
-                    <div className="text-[#394547]">
-                        When you save a book, it will appear here.
-                    </div>
+                        <div className="font-semibold text-[#042330]">
+                            Save your favorite books!
+                        </div>
+                        <div className="text-[#394547]">
+                            When you save a book, it will appear here.
+                        </div>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-14">
