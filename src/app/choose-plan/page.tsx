@@ -7,7 +7,6 @@ import { useState } from "react";
 import { FaHandshake } from "react-icons/fa";
 import { IoDocumentTextSharp } from "react-icons/io5"
 import { RiPlantFill } from "react-icons/ri";
-import { RxCaretDown } from "react-icons/rx";
 
 
 export default function Pricing() {
@@ -17,11 +16,15 @@ export default function Pricing() {
     const handleCheckout = () => {
         if (selectedPlan === "yearly") {
             console.log("starting 7-day free trial")
-            // stripe checkout routing logic for yearly plan//
         } else {
             console.log("starting monthly subscription")
-            // stripe checkout routing logic for monthly plan //
         }
+        const checkoutUrl =
+            selectedPlan === "yearly"
+            ? "https://buy.stripe.com/test_bJe7sFb1p3p79Qq3LJ14401"
+            : "https://buy.stripe.com/test_fZu14h8Th1gZ6Ee3LJ14400";
+        
+            window.location.href = checkoutUrl;
     }
     return (
         <>
@@ -134,10 +137,10 @@ export default function Pricing() {
                     <span>
                         <button 
                             onClick={handleCheckout}
-                            className="bg-[#2bd97c] text-[#032b41] w-full h-10 rounded-sm text-base flex items-center justify-center min-w-45"
+                            className="bg-[#2bd97c] hover:bg-[#20ba68] text-[#032b41] w-full h-10 rounded-sm text-base flex items-center justify-center min-w-45 cursor-pointer"
                             >
                                 {selectedPlan === "yearly"
-                                    ? "Start your free 7-day trial"
+                                    ? "Start your free 7-day trial" 
                                     : "Start your first month"}
                             </button>
                     </span>

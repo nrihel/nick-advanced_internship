@@ -2,6 +2,8 @@
 
 import axios from "axios";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext"
 import { useEffect, useState } from "react"
 import { AiOutlineClockCircle, AiOutlineStar } from "react-icons/ai";
 
@@ -27,6 +29,8 @@ export interface Book {
 export default function Recommended() {
     const [recommendedBooks, setRecommendedBooks] = useState<Book[]>([]);
     const [loading, setLoading] = useState(true);
+    const router = useRouter();
+    const { user, isPremium } = useAuth();
 
     useEffect(() => {
         async function getBooks() {
@@ -44,6 +48,16 @@ export default function Recommended() {
 
         getBooks();
     }, []);
+
+     const handleBookClick = (
+        e: React.MouseEvent<HTMLAnchorElement>,
+        book: Book
+    ) => {
+        if (book.subscriptionRequired && (!user || !isPremium)) {
+            e.preventDefault();
+            router.push("/choose-plan");
+        }    
+    }
 
     return (
     <>
@@ -73,6 +87,7 @@ export default function Recommended() {
                 <Link
                     key={book.id}
                     href={`/book/${book.id}`}
+                    onClick={(e) => handleBookClick(e, book)}
                     className="relative snap-center max-w-50 w-full pt-8 px-3 pb-3 rounded-sm hover:bg-[#f1f6f4] transition-colors"
                 >
                     {book.subscriptionRequired && (

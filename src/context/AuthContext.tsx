@@ -19,10 +19,11 @@ import {
 } from "firebase/auth";
 import { auth, googleProvider, db } from "@/app/lib/firebase/config";
 import LoginModal from "@/app/UI/LoginModal";
-import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { doc, getDoc, setDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 
 interface AuthContextType {
   user: User | null;
+  isPremium: boolean;
   loading: boolean;
   isLoginOpen: boolean;
   isSidebarOpen: boolean;
@@ -55,24 +56,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const closeSidebar = () => setIsSidebarOpen(false);
   const [savedBookIds, setSavedBookIds] = useState<string[]>([]);
   const [fontSize, setFontSize] = useState("text-base")
+  const [isPremium, setIsPremium] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+
       if (currentUser) {
         const userRef = doc(db, "users", currentUser.uid);
         const userSnap = await getDoc(userRef);
+
         if (userSnap.exists()) {
-          setSavedBookIds(userSnap.data().savedBooks || []);
+          const data = userSnap.data();
+          setSavedBookIds(data.savedBooks || []);
+
+          if (currentUser.isAnonymous) {
+            setIsPremium(false);
+          } else {
+            const tokenResult = await currentUser.getIdTokenResult();
+            setIsPremium(Boolean(data.isPremium || tokenResult.claims.stripeRole));
+          }
         } else {
-          await setDoc(userRef, {savedBooks: []});
+          await setDoc(userRef, { savedBooks: [], isPremium: false });
           setSavedBookIds([]);
+          setIsPremium(false);
         }
       } else {
         setSavedBookIds([]);
+        setIsPremium(false);
       }
+
       setLoading(false);
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -121,6 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
+        isPremium,
         loading,
         isLoginOpen,
         openModal,
