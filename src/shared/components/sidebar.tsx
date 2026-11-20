@@ -65,7 +65,7 @@ function SidebarContent() {
           />
         </div>
 
-        <div className={`flex flex-col justify-between pb-5 overflow-y-auto
+        <div className={`flex flex-col justify-between pb-2 overflow-y-auto
           isPlayerPage 
             ? "h-[calc(100vh-140px)]"
             : "h-[calc(100vh-60px)]"}`}>
