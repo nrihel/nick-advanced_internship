@@ -25,10 +25,10 @@ interface Book {
 
 interface AudioPlayerProps {
     book: Book;
-    onFinish?: () => void;
+    onEnded?: () => void;
 }
 
-export default function AudioPlayer({ book, onFinish }: AudioPlayerProps) {
+export default function AudioPlayer({ book, onEnded }: AudioPlayerProps) {
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     const [isPlaying, setIsPlaying] = useState(false);
@@ -93,7 +93,7 @@ export default function AudioPlayer({ book, onFinish }: AudioPlayerProps) {
                 onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
                 onEnded={() => {
                     setIsPlaying(false);
-                    onFinish?.();
+                    onEnded?.();
                 }}
             />
 

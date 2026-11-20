@@ -7,6 +7,8 @@ import axios from "axios";
 import { useParams } from "next/navigation";
 import AudioPlayer from "@/app/UI/AudioPlayer";
 import { useAuth } from "@/context/AuthContext";
+import { db } from "@/app/lib/firebase/config";
+import { arrayUnion, doc, setDoc } from "firebase/firestore";
 
 interface Book {
   id: string;
@@ -32,7 +34,8 @@ function Player() {
     const { id } = useParams<{ id: string }>();
     const [book, setBook] = useState<Book | null>(null);
     const [loading, setLoading] = useState(true);
-    const { fontSize } = useAuth();
+    const { fontSize, user } = useAuth();
+
     useEffect(() => {
         if (!id) return;
 
@@ -51,6 +54,23 @@ function Player() {
 
         getBook()
     }, [id])
+
+    async function handleBookFinished() {
+        if (!user || !book) return;
+
+        try {
+            const userRef = doc(db, "users", user.uid);
+            await setDoc(
+                userRef,
+                {
+                    finishedBooks: arrayUnion(book.id),
+                },
+                { merge: true }
+            );
+        } catch (error) {
+            console.error("failed to add to finished books", error);
+        }
+    }
 
     return (
     <>
@@ -80,7 +100,7 @@ function Player() {
                     </div>
                 </div>
             </div>
-            <AudioPlayer book={book} />
+            <AudioPlayer book={book} onEnded={handleBookFinished} />
             </>
             )    
         )}

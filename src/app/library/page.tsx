@@ -8,6 +8,8 @@ import axios from "axios";
 import Image from "next/image";
 import Link from "next/link";
 import { AiOutlineClockCircle, AiOutlineStar } from "react-icons/ai";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/app/lib/firebase/config"
 
 interface Book {
   id: string;
@@ -44,6 +46,8 @@ export default function MyLibrary() {
     const { user, loading: authLoading, openModal, savedBookIds } = useAuth();
     const [books, setBooks] = useState<Book[]>([]);
     const [loading, setLoading] = useState(false);
+    const [finishedBooks, setFinishedBooks] = useState<Book[]>([]);
+    const [finishedLoading, setFinishedLoading] = useState(false);
     
     useEffect(() => {
         if (!user || savedBookIds.length === 0) {
@@ -70,6 +74,50 @@ export default function MyLibrary() {
 
         getSavedBooks();
     }, [user, savedBookIds]);
+
+    useEffect(() => {
+        if (!user) {
+            setFinishedBooks([]);
+            return;
+        }
+
+        const uid = user.uid;
+
+        async function getFinishedBooks() {
+            setFinishedLoading(true);
+            try {
+                const userRef = doc(db, "users", uid);
+                const userSnap = await getDoc(userRef);
+
+                if (userSnap.exists()) {
+                    const finishedIds: string[] = userSnap.data().finishedBooks || [];
+
+                    if (finishedIds.length === 0) {
+                        setFinishedBooks([]);
+                        return;
+                    }
+
+                    const requests = finishedIds.map((bookId) =>
+                        axios.get<Book>(
+                             `https://us-central1-summaristt.cloudfunctions.net/getBook?id=${bookId}`
+                        )
+                    );
+                    const responses = await Promise.all(requests);
+                    setFinishedBooks(responses.map((res) => res.data));
+                } else {
+                    setFinishedBooks([]);
+                }
+            } catch (error) {
+                console.error("failed to fetch finished books:", error);
+            } finally {
+                setFinishedLoading(false);
+            }
+        }
+
+        getFinishedBooks();
+    }, [user]);
+
+
     return (
     <div className="flex">
         <Sidebar />
@@ -187,8 +235,51 @@ export default function MyLibrary() {
                     Finished
                 </div>
                 <div className="font-light text-[#394547] mb-6">
-                    0 items
+                    {finishedBooks.length}{""}
+                    {finishedBooks.length === 1 ? "item" : "items"}
                 </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-14">
+                    {finishedBooks.map((book) => (
+                        <Link
+                            href={`/book/${book.id}`}
+                            className="relative pt-8 px-3 pb-3 rounded-sm hover:bg-[#f1f6f4] transition-colors"
+                        >
+                            {book.subscriptionRequired && (
+                                <div className="bg-[#032b41] text-white text-[10px] font-medium px-2 h-4.5 rounded-full flex items-center absolute top-2 right-2">
+                                    Premium
+                                </div>
+                            )}
+                            <figure className="w-43 h-43 mx-auto mb-2">
+                                <img
+                                    src={book.imageLink}
+                                    alt={book.title}
+                                    className="w-full h-full object-contain"
+                                />
+                            </figure>
+                            <div className="font-bold text-base text-[#032b41] mb-2">
+                                {book.title}
+                            </div>
+                            <div className="text-sm text-[#6b757b] font-light mb-2">
+                                {book.author}
+                            </div>
+                            <div className="text-sm text-[#394547] mb-2">
+                                {book.subTitle}
+                            </div>
+                            <div className="flex items-center gap-2 text-sm font-light text-[#6b757b]">
+                                <div className="flex items-center- gap-1">
+                                    <AiOutlineClockCircle className="w-4 h-4" />
+                                    <span>03:42</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <AiOutlineStar className="w-4 h-4" />
+                                    <span>{book.averageRating}</span>
+                                </div>
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+                    
                 <div className="flex flex-col items-center gap-2 p-8 rounded-lg mx-auto mb-14 text-center bg-[#f1f6f4] max-w-fit">
                     <div className="text-[#042330] font-semibold">
                     Done and dusted!
@@ -197,6 +288,8 @@ export default function MyLibrary() {
                     When you finish a book, you can find it here later.
                     </div>
                 </div>
+                    
+                
                 </div>
             )}
             </div>
